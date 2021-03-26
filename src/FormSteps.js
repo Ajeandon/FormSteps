@@ -19,16 +19,25 @@ class FormSteps {
         document.getElementById(this.form_btn_prev_id).addEventListener('click', this.prev.bind(this))
     }
 
-    addStep(id, validator = null) {
+    addStep(id, callback = null, initcallback = null) {
+
+        callback = typeof callback === "function" ? callback : null
+        initcallback = typeof initcallback === "function" ? initcallback : null
+
         this.steps.push({
             id: id,
-            validator: validator
+            callback: callback,
+            initcallback: initcallback
         })
 
         return this
     }
 
     next() {
+        if(this.steps[this.current_step].callback != null && ! this.steps[this.current_step].callback()) {
+            return
+        }
+
         this.current_step++
         this.render()
     }
@@ -62,6 +71,10 @@ class FormSteps {
         document.querySelectorAll(`.${this.stepClass}`).forEach((el) => {
             el.style.display = 'none'
         })
+
+        if ( this.steps[this.current_step].initcallback != null ) {
+            this.steps[this.current_step].initcallback()
+        }
 
         this.getCurrentEl().style.display = 'block'
 
